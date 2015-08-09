@@ -20,18 +20,30 @@
  * See the Apex Language Reference for more information about Testing and Code Coverage.
  */
 @isTest
-private class LeadClone_Test {
-    static void testLeadClone() {
-        Lead leadInstance = new Lead();
-        leadInstance.LastName = 'Test';
-        leadInstance.Company = 'Test';
-        leadInstance.Status = 'Open - Not Contacted';
+public class BestPracticeDataFactory {
+    static Integer i;
+    
+    // Creating Account data for testing
+    public static testMethod List<Account> accountData() {
+        List<Account> accountDataList = new List<Account>();
         
-        Test.startTest();
-        insert leadInstance;
-        Test.stopTest();
+        // Creating 200 records of Account Data
+        for (i=0; i<200 ; i++) { 
+            Account accountInstance = new Account(Name='Test', Email_Address__c='abc@test.com');
+            accountDataList.add(accountInstance);
+        }
+        return accountDataList;
+    }
+    
+    // Creating Contact data for test
+    public static testMethod List<Contact> contactData() {
+        List<Contact> contactDataList = new List<Contact>();
         
-        List<Lead> listLead = [SELECT ID FROM Lead WHERE LastName = 'Test'];
-        System.assertEquals(2, listLead.size());
+       // Creating 200 records of Contact Data
+        for (i=0; i<200 ; i++) { 
+            Contact contactInstance = new Contact(LastName='Test');
+            contactDataList.add(contactInstance);
+        }
+        return contactDataList;
     }
 }
