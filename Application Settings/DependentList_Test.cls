@@ -22,55 +22,66 @@
  
 @isTest
 private class DependentList_Test {
-     public static testmethod void testCountry() {
-         List<Country__c> countryList = new List<Country__c>();
-         Country__c countryInstance1 = new Country__c(Name= 'India');
-         Country__c countryInstance2 = new Country__c(Name= 'USA');
-         Country__c countryInstance3 = new Country__c(Name= 'Pakistan');
-         countryList.add(countryInstance1);
-         countryList.add(countryInstance2);
-         countryList.add(countryInstance3);
+    public static testMethod void testGetAllCountry() {
         
-         Test.startTest();
-         insert countryList;
-         Test.stopTest();
+        // Create test data for country
+        List<Country__c> countryList = new List<Country__c>();
+        Country__c countryInstance1 = new Country__c(Name = 'India');
+        Country__c countryInstance2 = new Country__c(Name = 'USA');
+        Country__c countryInstance3 = new Country__c(Name = 'Pakistan');
+        countryList.add(countryInstance1);
+        countryList.add(countryInstance2);
+        countryList.add(countryInstance3);
         
-         DependentListController DependentListInstance = 
-            new DependentListController();
-         List<SelectOption> optionList = new List<SelectOption>();
-         optionList = DependentListInstance.selectedCountry();
-         System.assertEquals(3,optionList.size()); 
+        // Inserting country data
+        insert countryList;
+        
+        
+        
+        // New excution context
+        Test.startTest();
+		DependentListController DependentListInstance = new DependentListController();
+        List<SelectOption> optionList = new List<SelectOption>();
+        optionList = DependentListInstance.selectCountry();
+        Test.stopTest();
+        
+		// Checking that only 3 records are retrieved
+        System.assertEquals(3,optionList.size()); 
     }
   
   
-    public static testmethod void testRelatedCity()
-    {
-         
-         List<Country__c> countryList = new List<Country__c>();
-         Country__c countryInstance1 = new Country__c(Name= 'India');
-         Country__c countryInstance2 = new Country__c(Name= 'USA');
-         Country__c countryInstance3 = new Country__c(Name= 'Mexico');
-         countryList.add(countryInstance1);
-         countryList.add(countryInstance2);
-         countryList.add(countryInstance3);
-         
-         List<City__c> cityList = new List<City__c>();
-          
-         City__c firstCity = new City__c(Name= 'Banglore', Country__c='India');
-         City__c secondCity = new City__c(Name= 'Pune', Country__c='India' );
-         
-         cityList.add(firstCity);
-         cityList.add(secondCity);
-         
-         Test.startTest();
-         insert countryList;
-         insert cityList;
-         Test.stopTest();
-         
-         DependentListController DependentListInstance = new DependentListController();
-         DependentListInstance.selected = 'India';
-         DependentListInstance.relatedCity();
-         System.assertEquals(2, DependentListInstance.cityOptions.size());  
+    public static testMethod void testGetCountryRelatedCity() {
+        
+        // Create test data for country
+        List<Country__c> countryList = new List<Country__c>();
+        Country__c countryInstance1 = new Country__c(Name = 'India');
+        Country__c countryInstance2 = new Country__c(Name = 'USA');
+        Country__c countryInstance3 = new Country__c(Name = 'Mexico');
+        countryList.add(countryInstance1);
+        countryList.add(countryInstance2);
+        countryList.add(countryInstance3);
+        
+        // create test data for city
+        List<City__c> cityList = new List<City__c>();
+        City__c firstCity = new City__c(Name = 'Banglore', Country__c='India');
+        City__c secondCity = new City__c(Name = 'Pune', Country__c='India' );
+        cityList.add(firstCity);
+        cityList.add(secondCity);
+        
+        // Insert the data
+        insert countryList;
+        insert cityList;
+        
+        
+        // New excution context
+        Test.startTest();
+		DependentListController dependentListInstance = new DependentListController();
+        DependentListInstance.countrySelected = 'India';
+        DependentListInstance.relatedCity();
+        Test.stopTest();
+		
+		// Checking that only 2 records are retrieved
+        System.assertEquals(2, DependentListInstance.cityOptions.size());
     }
 }
 
