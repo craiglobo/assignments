@@ -5,23 +5,23 @@
  * remove the duplicate leads from the org. 
  * The criteria to find the duplicate records should be configurable. 
  */
-
 global with sharing class BatchLeads implements Database.Batchable<sObject>, Database.Stateful {
-    public Map<String,Lead> emailMap;
+    public Map<String, Lead> uniqueLeadMap;
     public List<Lead> duplicateLeadsList;
+    public String criteria;
     
     /**
-     * Initialization of emailMap and duplicateLeadsList in constructor
+     * Initialization of uniqueLeadMap and duplicateLeadsList in constructor
      */
-    public BatchLeads() {
-         
-         // Map to store unique leads on basis of email id; 
-         // Email in key part, Lead record in value part
-         emailMap = new Map<String,Lead>();
-         
-         // List to store Duplicated leads
-         duplicateLeadsList = new List<Lead>(); 
-         
+    public BatchLeads(String deleteCondition) {
+        criteria = deleteCondition;
+        
+        // Map to store unique leads on basis of email id; 
+        // Email in key part, Lead record in value part
+        uniqueLeadMap = new Map<String, Lead>();
+        
+        // List to store Duplicated leads
+        duplicateLeadsList = new List<Lead>(); 
     }
     
     /**
@@ -32,44 +32,79 @@ global with sharing class BatchLeads implements Database.Batchable<sObject>, Dat
             SELECT 
                 Id, 
                 Name, 
-                Email
+                Email,
+                Phone
             FROM 
                 Lead
-            WHERE 
-                Email <> null 
         ]);
     }
     
-    
     /**
-     * Sort the lead and add unique leads in map emailMap and 
+     * Sort the lead and add unique leads in map uniqueLeadMap and 
      * the duplicate leads in the list duplicateLeadsList 
      */
     global void execute(Database.BatchableContext BatchableContextInstance, List<Lead> leadList) {
-        for (Lead leadInstance : leadList) {
-            
-            //If key does not exist the excute > add the lead record in the emailMap
-            if (!(emailMap.containskey(leadInstance.Email))) {
-                emailMap.put(leadInstance.Email, leadInstance);
-            } 
-            
-            // Key exist then excute > add the lead record in the duplicateLeadsList
-            else {
-                duplicateLeadsList.add(leadInstance);
+        List<Lead> leadListIterate = leadList;
+        
+        // Configure the duplicate leads on Name
+        if (criteria == 'Name') {
+            for (Lead leadObject : leadListIterate) {
+                
+                // Add to unique map name as key
+                if (!uniqueLeadMap.containsKey(leadObject.Name)) { 
+                    uniqueLeadMap.put(leadObject.Name, leadObject);
+                }
+                
+                // Add to duplicate list
+                else {
+                    duplicateLeadsList.add(leadObject);
+                }
             }
         }
+        
+        // Configure the duplicate leads on Email Address
+        if (criteria == 'Email') {
+            for (Lead leadObject : leadListIterate) {
+                
+                // Add to unique map email as key
+                if (!uniqueLeadMap.containsKey(leadObject.Email)) { 
+                    uniqueLeadMap.put(leadObject.Email, leadObject);
+                }
+                
+                // Add to duplicate list
+                else {
+                    duplicateLeadsList.add(leadObject);
+                }
+            }
+        }
+        
+        // Configure the duplicate leads on phone number
+        if (criteria == 'Phone') {
+            for (Lead leadObject : leadListIterate) {
+                
+                // Add to unique map phone as key
+                if (!uniqueLeadMap.containsKey(leadObject.Phone)) { 
+                    uniqueLeadMap.put(leadObject.Phone, leadObject);
+                }
+                
+                // Add to duplicate list
+                else {
+                    duplicateLeadsList.add(leadObject);
+                }
+            }
+        }
+        
         // Null check befor DML operation
         if(!duplicateLeadsList.isEmpty()) {
             delete duplicateLeadsList;
         }
     }
-
+    
     /**
      * Print the final map with unique lead records with 
      * email address as key and lead record in value 
      */
     global void finish(Database.BatchableContext BatchableContextInstance) {
-        System.debug(' Map of Unique Lead records : ' + emailMap);
+        System.debug(' Map of Unique Lead records : ' + uniqueLeadMap);
     }
 }
-

@@ -34,29 +34,39 @@ private class BatchLeadTest {
         
         // Creation of 200 lead records
         for(Integer j = 0; j < 200; j++) {
-            leadRecord = new Lead(LastName = 'TestLead', Company = 'testCompanyLead',
-                Status = 'Open - Not Contacted');
+            leadRecord = new Lead(
+                LastName = 'TestLead', 
+                Company = 'testCompanyLead',
+                Status = 'Open - Not Contacted'
+            );
          leadList.add(leadRecord);
         }
         return leadList;
     }
     
     /**
-     * Check the lead duplication with same records 
+     * Check the lead duplication of lead records with same name 
      */
-    static testMethod void testDuplicateRecordsOfLead() {
-        List <Lead> leadInstance = createLeadData();
+    static testMethod void testDuplicateNameRecordsOfLead() {
+        
+        List<Lead> leadInstance = createLeadData();
         List<Lead> leadData = new List<Lead>();
         for (Lead leadObject : leadInstance) {
             leadObject.Email = 'abc@test.com';
             leadData.add(leadObject);
         }
-        
         insert leadData;
         
-        // New excution 
+        // Verify if all lead data is inserted successfully
+        System.assertEquals(200, leadData.size());
+        for (Lead leadIterator : leadData) {
+            System.assert(leadIterator.Id != null);
+        }
+         
+        // Create an Instance and execute the batch
         Test.startTest();
-        BatchLeads leadBatch = new BatchLeads();
+        String deleteCriteria = 'Name';
+        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
         Database.executeBatch(leadBatch);
         Test.stopTest();
         
@@ -68,41 +78,120 @@ private class BatchLeadTest {
                 Email
             FROM 
                 Lead
-            WHERE 
-                Email = 'abc@test.com'
         ];
         
-         // Check if there is 1 record  in the leadListResult list
+        // Check if there is 1 record  in the leadListResult list
         System.assertEquals(1,leadListResults.size());
     }
     
     /**
-     * Check the lead duplication with different records 
+     * Check the lead duplication of lead records with same email 
+     */
+    static testMethod void testDuplicateEmailRecordsOfLead() {
+        
+        List<Lead> leadInstance = createLeadData();
+        List<Lead> leadData = new List<Lead>();
+        for (Lead leadObject : leadInstance) {
+            leadObject.Email = 'abc@test.com';
+            leadData.add(leadObject);
+        }
+        insert leadData;
+        
+        // Verify if all lead data is inserted successfully
+        System.assertEquals(200, leadData.size());
+        for (Lead leadIterator : leadData) {
+            System.assert(leadIterator.Id != null);
+        }
+         
+        // Create an Instance and execute the batch
+        Test.startTest();
+        String deleteCriteria = 'Email';
+        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        Database.executeBatch(leadBatch);
+        Test.stopTest();
+        
+        // Retrive the lead records
+        List<Lead> leadListResults = [
+            SELECT 
+                Id, 
+                LastName, 
+                Email
+            FROM 
+                Lead
+        ];
+        
+        // Check if there is 1 record  in the leadListResult list
+        System.assertEquals(1,leadListResults.size());
+    }
+    
+    /**
+     * Check the lead duplication of lead records with same phone
+     */
+    static testMethod void testDuplicatePhoneRecordsOfLead() {
+        
+        List<Lead> leadInstance = createLeadData();
+        List<Lead> leadData = new List<Lead>();
+        for (Lead leadObject : leadInstance) {
+            leadObject.Phone = '1234567890';
+            leadData.add(leadObject);
+        }
+        insert leadData;
+        
+        // Verify if all lead data is inserted successfully
+        System.assertEquals(200, leadData.size());
+        for (Lead leadIterator : leadData) {
+            System.assert(leadIterator.Id != null);
+        }
+         
+        // Create an Instance and execute the batch
+        Test.startTest();
+        String deleteCriteria = 'Phone';
+        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        Database.executeBatch(leadBatch);
+        Test.stopTest();
+        
+        // Retrive the lead records
+        List<Lead> leadListResults = [
+            SELECT 
+                Id, 
+                LastName, 
+                Email
+            FROM 
+                Lead
+        ];
+        
+        // Check if there is 1 record  in the leadListResult list
+        System.assertEquals(1,leadListResults.size());
+    }
+    
+   
+    ////////////////////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * Check the lead duplication with Name records 
      */ 
-    static testMethod void testDifferentRecordsOfLead() {
-        List <Lead> leadInstance = createLeadData();
+    static testMethod void testDifferentNameRecordsOfLead() {
+        List<Lead> leadInstance = createLeadData();
         List<Lead> leadData = new List<Lead>();
         for (Lead leadObject : leadInstance) {
             i++;
-            leadObject.Email = 'abc@test.com' + i;
+            leadObject.LastName = 'TestLead' + i;
             leadData.add(leadObject);
         }
         
         // Insertion of lead data
         insert leadInstance;
-        for (Lead leadTest : [ 
-            SELECT 
-                LastName 
-            FROM 
-                Lead
-            ]
-        ) {
-            System.debug(leadTest);
+        
+        // Verify if all lead data is inserted successfully
+        System.assertEquals(200, leadInstance.size());
+        for (Lead leadIterator : leadInstance) {
+            System.assert(leadIterator.Id != null);
         }
         
-        // New excution context
+        // Create an Instance and execute the batch
         Test.startTest();
-        BatchLeads leadBatch = new BatchLeads();
+        String deleteCriteria = 'Name';
+        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
         Database.executeBatch(leadBatch);
         Test.stopTest();
         
@@ -116,7 +205,92 @@ private class BatchLeadTest {
                 Lead
         ];
         
-        // Check if there are 200 records in the  leadListResult list
-        System.assertEquals(200, leadListResult.size());
+        // Check if there are 200 records in the leadListResult list
+        System.assertEquals(leadInstance.size(), leadListResult.size());
     }
+    
+    /**
+     * Check the lead duplication with different email 
+     */ 
+    static testMethod void testDifferentEmailRecordsOfLead() {
+        List<Lead> leadInstance = createLeadData();
+        List<Lead> leadData = new List<Lead>();
+        for (Lead leadObject : leadInstance) {
+            i++;
+            leadObject.Email = 'abc' + i + '@test.com' ;
+            leadData.add(leadObject);
+        }
+        
+        // Insertion of lead data
+        insert leadInstance;
+        
+        // Verify if all lead data is inserted successfully
+        System.assertEquals(200, leadInstance.size());
+        for (Lead leadIterator : leadInstance) {
+            System.assert(leadIterator.Id != null);
+        }
+        
+        // Create an Instance and execute the batch
+        Test.startTest();
+        String deleteCriteria = 'Email';
+        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        Database.executeBatch(leadBatch);
+        Test.stopTest();
+        
+        // Retrive the lead records
+        List<Lead> leadListResult = [
+            SELECT 
+                Id, 
+                LastName, 
+                Email
+            FROM 
+                Lead
+        ];
+        
+        // Check if there are 200 records in the leadListResult list
+        System.assertEquals(leadInstance.size(), leadListResult.size());
+    }
+    
+    /**
+     * Check the lead duplication with different phone number records 
+     */ 
+    static testMethod void testDifferentPhoneRecordsOfLead() {
+        List<Lead> leadInstance = createLeadData();
+        List<Lead> leadData = new List<Lead>();
+        for (Lead leadObject : leadInstance) {
+            i++;
+            leadObject.Phone = '98745632' + i;
+            leadData.add(leadObject);
+        }
+        
+        // Insertion of lead data
+        insert leadInstance;
+        
+        // Verify if all lead data is inserted successfully
+        System.assertEquals(200, leadInstance.size());
+        for (Lead leadIterator : leadInstance) {
+            System.assert(leadIterator.Id != null);
+        }
+        
+        // Create an Instance and execute the batch
+        Test.startTest();
+        String deleteCriteria = 'Phone';
+        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        Database.executeBatch(leadBatch);
+        Test.stopTest();
+        
+        // Retrive the lead records
+        List<Lead> leadListResult = [
+            SELECT 
+                Id, 
+                LastName, 
+                Email
+            FROM 
+                Lead
+        ];
+        
+        // Check if there are 200 records in the leadListResult list
+        System.assertEquals(leadInstance.size(), leadListResult.size());
+    }
+    
 }

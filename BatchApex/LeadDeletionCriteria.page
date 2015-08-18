@@ -1,0 +1,11 @@
+<apex:page controller="BatchLeadsController" >
+    <apex:form id="form">
+        <apex:selectList value="{!selectedField}" size="1" multiselect="false">
+            <apex:outputText > Fields </apex:outputText>
+            <br />
+            <apex:selectOptions value="{!displayFields}" /> 
+        </apex:selectList>
+        <br />
+        <apex:commandButton value="Go" action="{!startLeadDeletionBatch}" />
+    </apex:form>
+</apex:page>

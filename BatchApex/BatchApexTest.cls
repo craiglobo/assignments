@@ -25,35 +25,53 @@ private class BatchApexTest {
     /**
      * Test the opportunity mail
      */
-    static testMethod void testOpportunityMail() {
+    static testMethod void testOpportunityAmount() {
         List<Account> accountList = new List<Account>();
         List<Opportunity> opportunityList = new List<Opportunity>();
-        for(Integer i = 0; i < 5; i++) {
-            accountList.add(new Account(Primary_Email__c = 'craig' + i + '@eternussolutions.com',
-                Name = ''+i, Email_Address__c = 'test' + i + '@eternussolutions.com'));
-        }
-
+        accountList.add(
+                new Account(
+                Name = 'craig',
+                Primary_Email__c = 'craig@eternussolutions.com',
+                Email_Address__c = 'test@eternussolutions.com')
+        );
+        
+        // Insert the account data
         insert accountList;
-        for(Integer i = 0; i < 5; i++) {
-            opportunityList.add(new Opportunity(Amount = 5, StageName = 'Closed Won',
-                Name = 'Closed Opportunity '+ i, CloseDate = (Date)Date.today(),
-                AccountId = accountList[i].Id)); 
+        
+        // Verify if all account data is inserted successfully
+        System.assertEquals(1, accountList.size());
+        for (Account accountInstance : accountList) {
+            System.assert(accountInstance.Id != null);
         }
         
-        opportunityList.add(new Opportunity(Amount = 12, StageName = 'Closed Won',
-            Name = 'TestOpportunity', CloseDate = (Date) Date.today(), 
-            AccountId = accountList[0].Id));
+        // Create Opportunity data
+        for (Integer i = 0; i < 5; i++) {
+            opportunityList.add(
+                new Opportunity(
+                Amount = 10, 
+                StageName = 'Closed Won',
+                Name = 'Closed Opportunity '+ i, 
+                CloseDate = (Date) Date.today(),
+                AccountId = accountList[0].Id)
+            ); 
+        }
         
+        // Insert the opportunity data
         insert opportunityList; 
         
+        // Verify if all opportunity data is inserted successfully
+        System.assertEquals(5, opportunityList.size());
+        for (Opportunity opportunityInstance : opportunityList) {
+            System.assert(opportunityInstance.Id != null);
+        }
         
-        // New excution context
+        // Create an instance of the batch and execute the batch
         Test.startTest();
         BatchApex batchInstance = new BatchApex();
         Database.executeBatch(batchInstance);
         Test.stopTest();
         
-        // Check
-        //System.assert();
+        // Check the final amount of the opportunities  
+        System.assertEquals(50, BatchApex.totalOpportunityAmount );
     }
 }

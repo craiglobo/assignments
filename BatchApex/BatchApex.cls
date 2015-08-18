@@ -9,25 +9,14 @@
  */
 global with sharing class BatchApex implements Database.Batchable<Sobject>, Database.Stateful, 
     Schedulable {
-    map<String,WrapperClass> accountOpportunityMap;
-    public BatchApex() {
-        accountOpportunityMap = new Map<String,WrapperClass>();
-    }
+    Map<String,WrapperClass> accountOpportunityMap;
+    public static Double totalOpportunityAmount;
     
     /**
-     * Wrapper class with opportunity and sum
+     * Constructor to initialize the map to store opportunities and their sum
      */
-    public class WrapperClass {
-         List<Opportunity> opportunityList;
-         Double sum;
-         
-        /**
-         *Constructor to initialize the warpper class variables
-         */
-        public WrapperClass() {
-            opportunityList = new List<Opportunity>();
-            sum = 0;
-        }
+    public BatchApex() {
+        accountOpportunityMap = new Map<String, WrapperClass>();
     }
     
     /**
@@ -49,6 +38,10 @@ global with sharing class BatchApex implements Database.Batchable<Sobject>, Data
                     AccountId <> null 
                 AND 
                     Opportunity.Account.Email_Address__c <> null
+                AND
+                    StageName = 'Closed Won'
+                AND
+                    CloseDate = TODAY
             ]);
     }
     
@@ -56,64 +49,86 @@ global with sharing class BatchApex implements Database.Batchable<Sobject>, Data
      * This will sum up all the closed won opportunities of a perticular account per day
      * and will send a mail to the primary contact
      */
-    global void execute(Database.BatchableContext batchableContext,
-         List<Opportunity> opportunityparameter) {
-        for(Opportunity opportunityInstance : opportunityparameter) {
-            if(accountOpportunityMap.containsKey(opportunityInstance.Account.Email_Address__c)) {
-                WrapperClass wrapperInstance = accountOpportunityMap.get(
-                    opportunityInstance.Account.Email_Address__c);
+    global void execute(
+        Database.BatchableContext batchableContext,
+        List<Opportunity> opportunityList) {
+        for (Opportunity opportunityInstance : opportunityList) {
+            if (accountOpportunityMap.containsKey(opportunityInstance.Account.Email_Address__c)) {
+                WrapperClass wrapperInstance = 
+                    accountOpportunityMap.get(opportunityInstance.Account.Email_Address__c);
                 
                 // Add the opportunity in the opportunity list in the wrapper class
                 wrapperInstance.opportunityList.add(opportunityInstance);
                 
                 // Add the amount of that opportunity which is inserted in the opportunity list 
                 // in the sum variable in the wrapper class
-                wrapperInstance.sum += opportunityInstance.Amount;
+                wrapperInstance.amountSum += opportunityInstance.Amount;
+                totalOpportunityAmount += opportunityInstance.Amount;
                 accountOpportunityMap.put(
                     opportunityInstance.Account.Email_Address__c, wrapperInstance);
-            }
-            else {
+            } else {
                 wrapperClass wrapperInstance = new wrapperClass();
                 wrapperInstance.opportunityList.add(opportunityInstance);
-                wrapperInstance.sum = opportunityInstance.Amount;
+                wrapperInstance.amountSum = opportunityInstance.Amount;
+                totalOpportunityAmount = opportunityInstance.Amount;
                 accountOpportunityMap.put
-                    (opportunityInstance.Account.Email_Address__c, wrapperInstance);
+                    (opportunityInstance.Account.Email_Address__c, 
+                    wrapperInstance
+                );
             }
         }
     }
-     
-      global void execute(SchedulableContext schedulableContext) {
-          
-      }
-     
-     /**
-      * The finish block to send mail to primary contact of all opportunities 
-      * with the with their ammount
-      */
+    
+    /**
+     * This is an execute block of schedulable.
+     */
+    global void execute(SchedulableContext schedulableContext) {
+        
+    }
+    
+    /**
+     * The finish block to send mail to primary contact of all opportunities 
+     * with the sum of their amount.
+     */
     global void finish(Database.BatchableContext batchableContext) {
         List<Messaging.SingleEmailMessage> mailInstance = new List<Messaging.SingleEmailMessage>();
-        List<String> sendTo = new List<String>();
-        for(String emailInstance : accountOpportunityMap.keySet()) {
+        List<String> sendToList = new List<String>();
+        for (String emailInstance : accountOpportunityMap.keySet()) {
             Messaging.SingleEmailMessage individualMail = new Messaging.SingleEmailMessage();
             WrapperClass wrapperInstance = accountOpportunityMap.get(emailInstance);
             
             // Recipient email id
-            sendTo.add('craig.lobo@eternussolutions.com');
-            individualMail.setToAddresses(sendTo);
+            sendToList.add(emailInstance);
+            individualMail.setToAddresses(sendToList);
             individualMail.setSenderDisplayName('SalesForce.com');
             individualMail.setSubject('List Of Opportunities and Amount');
             String body = 'Hello ' + IndividualMail;
             body += ' Opportunities associated to your'; 
             body += ' account and the aggregate of their amount';
-            body += ' ' + wrapperInstance.opportunityList + ' ' + wrapperInstance.sum;
+            body += ' ' + wrapperInstance.opportunityList + ' ' + wrapperInstance.amountSum;
             for (Opportunity opportunityInstance : wrapperInstance.opportunityList) {
                 body += '\n' + opportunityInstance.Name + ' ' + opportunityInstance.Amount;
             }
-            body += '\n ' +wrapperInstance.sum;
+            body += '\n ' +wrapperInstance.amountSum;
             individualMail.setHtmlBody(body);
             mailInstance.add(individualMail); 
         }
         Messaging.sendEmail(mailInstance);
     }
+    
+     /**
+     * Wrapper class with opportunity and sum
+     */
+    public class WrapperClass {
+         List<Opportunity> opportunityList;
+         Double amountSum;
+         
+        /**
+         *Constructor to initialize the warpper class variables
+         */
+        public WrapperClass() {
+            opportunityList = new List<Opportunity>();
+            amountSum = 0;
+        }
+    }
 }
-
