@@ -8,13 +8,19 @@
 global with sharing class BatchLeads implements Database.Batchable<sObject>, Database.Stateful {
     public Map<String, Lead> uniqueLeadMap;
     public List<Lead> duplicateLeadsList;
-    public String criteria;
+    public String deleteCriteria;
+    Map<String, DuplicateLeads__c> leadDeletionCriteria;
     
-    /**
+    /** 
      * Initialization of uniqueLeadMap and duplicateLeadsList in constructor
      */
-    public BatchLeads(String deleteCondition) {
-        criteria = deleteCondition;
+    public BatchLeads() {
+        
+        // Get values from custom settings
+        leadDeletionCriteria = DuplicateLeads__c.getAll();
+        for (String stringInstance : leadDeletionCriteria.keySet()) {
+            deleteCriteria = stringInstance;
+        }
         
         // Map to store unique leads on basis of email id; 
         // Email in key part, Lead record in value part
@@ -23,7 +29,7 @@ global with sharing class BatchLeads implements Database.Batchable<sObject>, Dat
         // List to store Duplicated leads
         duplicateLeadsList = new List<Lead>(); 
     }
-    
+     
     /**
      * Query to fetch the Leads and get all lead which have email not null  
      */
@@ -38,7 +44,7 @@ global with sharing class BatchLeads implements Database.Batchable<sObject>, Dat
                 Lead
         ]);
     }
-    
+     
     /**
      * Sort the lead and add unique leads in map uniqueLeadMap and 
      * the duplicate leads in the list duplicateLeadsList 
@@ -47,7 +53,7 @@ global with sharing class BatchLeads implements Database.Batchable<sObject>, Dat
         List<Lead> leadListIterate = leadList;
         
         // Configure the duplicate leads on Name
-        if (criteria == 'Name') {
+        if (deleteCriteria == 'Name') {
             for (Lead leadObject : leadListIterate) {
                 
                 // Add to unique map name as key
@@ -60,10 +66,10 @@ global with sharing class BatchLeads implements Database.Batchable<sObject>, Dat
                     duplicateLeadsList.add(leadObject);
                 }
             }
-        }
-        
+            
         // Configure the duplicate leads on Email Address
-        if (criteria == 'Email') {
+        } 
+        if (deleteCriteria == 'Email') {
             for (Lead leadObject : leadListIterate) {
                 
                 // Add to unique map email as key
@@ -76,10 +82,10 @@ global with sharing class BatchLeads implements Database.Batchable<sObject>, Dat
                     duplicateLeadsList.add(leadObject);
                 }
             }
-        }
-        
+            
         // Configure the duplicate leads on phone number
-        if (criteria == 'Phone') {
+        }
+        if (deleteCriteria == 'Phone') {
             for (Lead leadObject : leadListIterate) {
                 
                 // Add to unique map phone as key
@@ -93,13 +99,13 @@ global with sharing class BatchLeads implements Database.Batchable<sObject>, Dat
                 }
             }
         }
-        
+         
         // Null check befor DML operation
-        if(!duplicateLeadsList.isEmpty()) {
+        if (!duplicateLeadsList.isEmpty()) {
             delete duplicateLeadsList;
         }
     }
-    
+     
     /**
      * Print the final map with unique lead records with 
      * email address as key and lead record in value 

@@ -1,11 +1,22 @@
-<apex:page controller="BatchLeadsController" >
-    <apex:form id="form">
-        <apex:selectList value="{!selectedField}" size="1" multiselect="false">
-            <apex:outputText > Fields </apex:outputText>
-            <br />
-            <apex:selectOptions value="{!displayFields}" /> 
-        </apex:selectList>
-        <br />
-        <apex:commandButton value="Go" action="{!startLeadDeletionBatch}" />
-    </apex:form>
-</apex:page>
+<apex:page controller="BatchLeadsController">
+    <div align="center">
+        <apex:form id="form">
+            <apex:pageBlock>
+                <apex:pageBlockSection>
+                    <apex:outputText >
+                        <h1> Delete the leads on the following duplicate fields </h1>
+                    </apex:outputText>
+                    <br />
+                    <br />
+                    <apex:selectList value="{!selectedField}" size="1" multiselect="false" >
+                        <apex:selectOptions value="{!ConfigurableFields}" />
+                    </apex:selectList>
+                    <br /> 
+                    <br />
+                    <apex:commandButton value="Go" action="{!updateField}"  />
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:form>
+    </div>
+</apex:page> 
+   

@@ -9,7 +9,7 @@
  */
 global with sharing class BatchApex implements Database.Batchable<Sobject>, Database.Stateful, 
     Schedulable {
-    Map<String,WrapperClass> accountOpportunityMap;
+    Map<String, WrapperClass> accountOpportunityMap;
     public static Double totalOpportunityAmount;
     
     /**
@@ -30,14 +30,14 @@ global with sharing class BatchApex implements Database.Batchable<Sobject>, Data
                     Name, 
                     Amount, 
                     StageName, 
-                    Opportunity.Account.Email_Address__c, 
+                    Opportunity.Account.Primary_Email__c, 
                     AccountId 
                 FROM 
                     Opportunity 
                 WHERE 
                     AccountId <> null 
                 AND 
-                    Opportunity.Account.Email_Address__c <> null
+                    Opportunity.Account.Primary_Email__c <> null
                 AND
                     StageName = 'Closed Won'
                 AND
@@ -53,9 +53,9 @@ global with sharing class BatchApex implements Database.Batchable<Sobject>, Data
         Database.BatchableContext batchableContext,
         List<Opportunity> opportunityList) {
         for (Opportunity opportunityInstance : opportunityList) {
-            if (accountOpportunityMap.containsKey(opportunityInstance.Account.Email_Address__c)) {
+            if (accountOpportunityMap.containsKey(opportunityInstance.Account.Primary_Email__c)) {
                 WrapperClass wrapperInstance = 
-                    accountOpportunityMap.get(opportunityInstance.Account.Email_Address__c);
+                    accountOpportunityMap.get(opportunityInstance.Account.Primary_Email__c);
                 
                 // Add the opportunity in the opportunity list in the wrapper class
                 wrapperInstance.opportunityList.add(opportunityInstance);
@@ -65,14 +65,14 @@ global with sharing class BatchApex implements Database.Batchable<Sobject>, Data
                 wrapperInstance.amountSum += opportunityInstance.Amount;
                 totalOpportunityAmount += opportunityInstance.Amount;
                 accountOpportunityMap.put(
-                    opportunityInstance.Account.Email_Address__c, wrapperInstance);
+                    opportunityInstance.Account.Primary_Email__c, wrapperInstance);
             } else {
                 wrapperClass wrapperInstance = new wrapperClass();
                 wrapperInstance.opportunityList.add(opportunityInstance);
                 wrapperInstance.amountSum = opportunityInstance.Amount;
                 totalOpportunityAmount = opportunityInstance.Amount;
                 accountOpportunityMap.put
-                    (opportunityInstance.Account.Email_Address__c, 
+                    (opportunityInstance.Account.Primary_Email__c, 
                     wrapperInstance
                 );
             }

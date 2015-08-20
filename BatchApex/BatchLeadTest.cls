@@ -24,7 +24,7 @@
 private class BatchLeadTest {
     static List<Lead> leadList = new List<Lead>(); 
     static List<Lead> duplicateLeadList = new List<Lead>(); 
-    static Lead  leadRecord;
+    static Lead leadRecord;
     static Integer i = 0;
     
     /**
@@ -33,7 +33,7 @@ private class BatchLeadTest {
     static List<Lead> createLeadData() {
         
         // Creation of 200 lead records
-        for(Integer j = 0; j < 200; j++) {
+        for (Integer j = 0; j < 200; j++) {
             leadRecord = new Lead(
                 LastName = 'TestLead', 
                 Company = 'testCompanyLead',
@@ -48,7 +48,6 @@ private class BatchLeadTest {
      * Check the lead duplication of lead records with same name 
      */
     static testMethod void testDuplicateNameRecordsOfLead() {
-        
         List<Lead> leadInstance = createLeadData();
         List<Lead> leadData = new List<Lead>();
         for (Lead leadObject : leadInstance) {
@@ -62,11 +61,17 @@ private class BatchLeadTest {
         for (Lead leadIterator : leadData) {
             System.assert(leadIterator.Id != null);
         }
-         
+        
+        // Insert the custom settings
+        List<DuplicateLeads__c> criteriaList = new List<DuplicateLeads__c>();
+        DuplicateLeads__c criteriaInstance = new DuplicateLeads__c(Name = 'Name');
+        criteriaList.add(criteriaInstance);
+        insert criteriaList;
+        
         // Create an Instance and execute the batch
         Test.startTest();
         String deleteCriteria = 'Name';
-        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        BatchLeads leadBatch = new BatchLeads();
         Database.executeBatch(leadBatch);
         Test.stopTest();
         
@@ -81,14 +86,13 @@ private class BatchLeadTest {
         ];
         
         // Check if there is 1 record  in the leadListResult list
-        System.assertEquals(1,leadListResults.size());
+        System.assertEquals(1, leadListResults.size());
     }
     
     /**
      * Check the lead duplication of lead records with same email 
      */
     static testMethod void testDuplicateEmailRecordsOfLead() {
-        
         List<Lead> leadInstance = createLeadData();
         List<Lead> leadData = new List<Lead>();
         for (Lead leadObject : leadInstance) {
@@ -102,11 +106,17 @@ private class BatchLeadTest {
         for (Lead leadIterator : leadData) {
             System.assert(leadIterator.Id != null);
         }
-         
+        
+        // Insert the custom settings
+        List<DuplicateLeads__c> criteriaList = new List<DuplicateLeads__c>();
+        DuplicateLeads__c criteriaInstance = new DuplicateLeads__c(Name = 'Email');
+        criteriaList.add(criteriaInstance);
+        insert criteriaList;
+        
         // Create an Instance and execute the batch
         Test.startTest();
         String deleteCriteria = 'Email';
-        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        BatchLeads leadBatch = new BatchLeads();
         Database.executeBatch(leadBatch);
         Test.stopTest();
         
@@ -121,7 +131,7 @@ private class BatchLeadTest {
         ];
         
         // Check if there is 1 record  in the leadListResult list
-        System.assertEquals(1,leadListResults.size());
+        System.assertEquals(1, leadListResults.size());
     }
     
     /**
@@ -142,11 +152,16 @@ private class BatchLeadTest {
         for (Lead leadIterator : leadData) {
             System.assert(leadIterator.Id != null);
         }
-         
+        
+        // Insert the custom settings
+        List<DuplicateLeads__c> criteriaList = new List<DuplicateLeads__c>();
+        DuplicateLeads__c criteriaInstance = new DuplicateLeads__c(Name = 'Phone');
+        criteriaList.add(criteriaInstance);
+        insert criteriaList;
+        
         // Create an Instance and execute the batch
         Test.startTest();
-        String deleteCriteria = 'Phone';
-        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        BatchLeads leadBatch = new BatchLeads();
         Database.executeBatch(leadBatch);
         Test.stopTest();
         
@@ -161,11 +176,8 @@ private class BatchLeadTest {
         ];
         
         // Check if there is 1 record  in the leadListResult list
-        System.assertEquals(1,leadListResults.size());
+        System.assertEquals(1, leadListResults.size());
     }
-    
-   
-    ////////////////////////////////////////////////////////////////////////////////////////
     
     /**
      * Check the lead duplication with Name records 
@@ -188,10 +200,15 @@ private class BatchLeadTest {
             System.assert(leadIterator.Id != null);
         }
         
+        // Insert the custom settings
+        List<DuplicateLeads__c> criteriaList = new List<DuplicateLeads__c>();
+        DuplicateLeads__c criteriaInstance = new DuplicateLeads__c(Name = 'Name');
+        criteriaList.add(criteriaInstance);
+        insert criteriaList;
+        
         // Create an Instance and execute the batch
         Test.startTest();
-        String deleteCriteria = 'Name';
-        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        BatchLeads leadBatch = new BatchLeads();
         Database.executeBatch(leadBatch);
         Test.stopTest();
         
@@ -230,10 +247,15 @@ private class BatchLeadTest {
             System.assert(leadIterator.Id != null);
         }
         
+        // Insert the custom settings
+        List<DuplicateLeads__c> criteriaList = new List<DuplicateLeads__c>();
+        DuplicateLeads__c criteriaInstance = new DuplicateLeads__c(Name = 'Email');
+        criteriaList.add(criteriaInstance);
+        insert criteriaList;
+        
         // Create an Instance and execute the batch
         Test.startTest();
-        String deleteCriteria = 'Email';
-        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        BatchLeads leadBatch = new BatchLeads();
         Database.executeBatch(leadBatch);
         Test.stopTest();
         
@@ -272,10 +294,15 @@ private class BatchLeadTest {
             System.assert(leadIterator.Id != null);
         }
         
+        // Insert the custom settings
+        List<DuplicateLeads__c> criteriaList = new List<DuplicateLeads__c>();
+        DuplicateLeads__c criteriaInstance = new DuplicateLeads__c(Name = 'Phone');
+        criteriaList.add(criteriaInstance);
+        insert criteriaList;
+        
         // Create an Instance and execute the batch
         Test.startTest();
-        String deleteCriteria = 'Phone';
-        BatchLeads leadBatch = new BatchLeads(deleteCriteria);
+        BatchLeads leadBatch = new BatchLeads();
         Database.executeBatch(leadBatch);
         Test.stopTest();
         
@@ -292,5 +319,4 @@ private class BatchLeadTest {
         // Check if there are 200 records in the leadListResult list
         System.assertEquals(leadInstance.size(), leadListResult.size());
     }
-    
 }

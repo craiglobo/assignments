@@ -4,30 +4,37 @@
  */
 public with sharing class BatchLeadsController {
     public String selectedField {get; set;}
+    public List<SelectOption> leadFields {get; set;}
     
     /**
-     * Call the custom settings to get the records in the constructor
+     * Configurable fields list 
      */
-    
-    /**
-     * Get The configurable fields from the custom settings
-     */
-    public List<SelectOption> displayFields {
-        get {
-            displayFields = new List<SelectOption>();
-            for (DuplicateLeads__c leadInstance_c : DuplicateLeads__c.getAll().Values()) {
-                displayFields.add(new SelectOption(leadInstance_c.Name, leadInstance_c.Name));
-            }
-            return displayFields;
-        }
-        set;
+    public List<SelectOption> getConfigurableFields() {
+        List<SelectOption> leadFields = new List<SelectOption>();
+        leadFields.add(new SelectOption('None', 'None'));
+        leadFields.add(new SelectOption('Name', System.Label.Name));
+        leadFields.add(new SelectOption('Email', System.Label.Email));
+        leadFields.add(new SelectOption('Phone', System.Label.Phone));
+        return leadFields;
     }
     
     /**
-     * Call the batch and delete the duplicate leads 
+     * Update the field in the custom settings
      */
-    public void startLeadDeletionBatch() {
-        BatchLeads batchLeadsInstance = new BatchLeads(selectedField);
-        Database.executeBatch(batchLeadsInstance);
+    public void updateField() {
+        if (selectedField != 'None') {
+            DuplicateLeads__c duplicateLeadInstance = [ 
+                SELECT 
+                    Name 
+                FROM 
+                    DuplicateLeads__c 
+                WHERE 
+                    Name <> null
+            ];
+            duplicateLeadInstance.Name = selectedField;
+            update duplicateLeadInstance;
+        } else {
+            System.debug('Helppp !!');
+        }
     }
 }

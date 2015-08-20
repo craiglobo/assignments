@@ -26,11 +26,12 @@ private class BatchApexTest {
      * Test the opportunity mail
      */
     static testMethod void testOpportunityAmount() {
+        Double testAmount = 0;
         List<Account> accountList = new List<Account>();
         List<Opportunity> opportunityList = new List<Opportunity>();
         accountList.add(
                 new Account(
-                Name = 'craig',
+                Name = 'test',
                 Primary_Email__c = 'craig@eternussolutions.com',
                 Email_Address__c = 'test@eternussolutions.com')
         );
@@ -50,11 +51,11 @@ private class BatchApexTest {
                 new Opportunity(
                 Amount = 10, 
                 StageName = 'Closed Won',
-                Name = 'Closed Opportunity '+ i, 
-                CloseDate = (Date) Date.today(),
-                AccountId = accountList[0].Id)
+                Name = 'Closed Opportunity' + i, 
+                CloseDate = (Date) Date.today(), 
+                AccountId = accountList[0].Id) 
             ); 
-        }
+        } 
         
         // Insert the opportunity data
         insert opportunityList; 
@@ -62,6 +63,7 @@ private class BatchApexTest {
         // Verify if all opportunity data is inserted successfully
         System.assertEquals(5, opportunityList.size());
         for (Opportunity opportunityInstance : opportunityList) {
+            testAmount += opportunityInstance.Amount;
             System.assert(opportunityInstance.Id != null);
         }
         
@@ -72,6 +74,6 @@ private class BatchApexTest {
         Test.stopTest();
         
         // Check the final amount of the opportunities  
-        System.assertEquals(50, BatchApex.totalOpportunityAmount );
+        System.assertEquals(testAmount, BatchApex.totalOpportunityAmount);
     }
 }
