@@ -7,7 +7,7 @@
  * The email body should contain the Opportunity Name & it's respective amount 
  * with the aggregated amount in the end. 
  */
-global with sharing class BatchApex implements Database.Batchable<Sobject>, Database.Stateful, 
+global with sharing class BatchApex implements Database.Batchable<SObject>, Database.Stateful, 
     Schedulable {
     Map<String, WrapperClass> accountOpportunityMap;
     public static Double totalOpportunityAmount;
