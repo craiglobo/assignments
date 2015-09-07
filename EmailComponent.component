@@ -1,0 +1,13 @@
+<apex:component controller = "EmailComponentController" access = "global" > 
+    <apex:attribute name = "queryId" type = "id" assignTo = "{!idQuery}" 
+        description = "This is the query id" /> 
+    <apex:repeat value = "{!responseList}" var = "r"> 
+        <h3>
+            <apex:outputText value = "{!r.Title__c}" >{!r.Title__c}
+            </apex:outputText>
+        </h3> 
+        <apex:outputLink value = "{!r.Link__c}" >{!r.Link__c}</apex:outputLink><br />
+        <apex:outputText value = "{!r.Description__c}" />
+    </apex:repeat>
+</apex:component>  
+
